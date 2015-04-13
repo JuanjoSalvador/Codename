@@ -1,6 +1,7 @@
 # JmusicLib
 
 #### Proyecto de Juan José Salvador Piedra
+###### 1º DAW IES Celia Viñas
 
 Se trata de una aplicación que permite organizar y reproducir la música que tenemos descargada en nuestro equipo, utilizando los metadatos de esta (*es decir, la información extra contenida en los archivos MP3*).
 

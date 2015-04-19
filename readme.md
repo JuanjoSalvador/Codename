@@ -22,4 +22,4 @@ Entre las funciones planeadas, se encuentra la reproducción de archivos MP3, OG
 ### Enlaces externos
 * [Beaglebuddy](http://www.beaglebuddy.com/)
 * [JLayer](http://www.javazoom.net/javalayer/javalayer.html)
-* [Actualizaciones live del proyecto vía Twitter #JmusicLib](https://twitter.com/search?f=realtime&q=%23JmusicLib)
+* [#JmusicLib en vivo](https://twitter.com/search?q=%23JmusicLib)

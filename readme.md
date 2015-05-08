@@ -20,6 +20,5 @@ Para la extracción de metadatos de MP3, utiliza la librería **Beaglebuddy**.
 Entre las funciones planeadas, se encuentra la reproducción de archivos MP3, OGG y FLAC, aunque estos dos últimos aparentemente aún no son soportados por Java. La reproducción de MP3 se llevará a cabo mediante la librería **JLayer**.
 
 ### Enlaces externos
-* [Beaglebuddy](http://www.beaglebuddy.com/)
-* [JLayer](http://www.javazoom.net/javalayer/javalayer.html)
-* [#JmusicLib en vivo](https://twitter.com/search?q=%23JmusicLib)
+* Beaglebuddy http://www.beaglebuddy.com/
+* JLayer http://www.javazoom.net/javalayer/javalayer.html

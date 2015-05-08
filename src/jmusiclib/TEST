@@ -1,0 +1,76 @@
+// Método void readDir(File dir) que lee un DIRECTORIO Y SUBDIRECTORIOS, si encuentra un MP3 llama al método readMp3()
+
+    public static void readDir(File dir) {      
+        File[] dirArray = dir.listFiles();
+        Arrays.sort(dirArray); // Array de File ordenado con el contenido del directorio de música
+        
+        for (int i = 0; i < dirArray.length; i++) {
+            String name = dirArray[i].getName();
+
+            if (dirArray[i].isDirectory()) {
+                File subdir = dirArray[i];
+                readDir(subdir);
+            } else {
+                if (Biblioteca.extension(name).equals("lac") || Biblioteca.extension(name).equals("ogg")) {
+                    System.out.println("El fichero [" + dirArray[i] + "] no es un MP3");
+                    //noData(dirArr[i]);
+                } else {
+                    if (Biblioteca.extension(name).equals("mp3")) {
+                        System.out.println(dirArray[i]);
+                        //readMp3(dirArr[i]);
+                    }
+                }
+            }
+        }
+    }
+
+// getMp3Artist(File mp3)
+public static String getMp3Artist(File mp3) {
+    MP3 mp3File = new MP3(mp3);
+    String mp3Author = mp3File.getLeadPerformer();
+    return mp3Author;
+}
+
+// getMp3Album(File mp3)
+public static String getMp3Album(File mp3) {
+    MP3 mp3File = new MP3(mp3);
+    String mp3Album = mp3File.getAlbum();
+    return mp3Album;
+}
+// MP3
+if (!dirArray[i].isDirectory() && extension(name).equals("mp3")) { // Comprueba si el elemento ES UN MP3
+
+// Método createMp3Folder() 
+public static void createMp3Folder() {
+    // Crea la carpeta Artista/Album
+    File folder = new File(dirAutor);
+    if (!folder.exists()) { // Si el directorio "autores" NO existe, lo crea.
+        File directorio = new File(music_path() + "/" + getMp3Album() + "/" + getMp3Album());
+        directorio.mkdirs();
+    }
+}
+// moveMp3(File mp3)
+
+public static void moveMp3(File mp3) {
+    String name = mp3.getName();
+
+    InputStream in = new FileInputStream(mp3);
+    OutputStream out = new FileOutputStream(music_path() + "/" + getMp3Author(mp3) + "/" + getMp3Album(mp3) + "/" + name);
+
+    byte[] buf = new byte[8192];
+    int len;
+        while ((len = in.read(buf)) > 0) {
+            out.write(buf, 0, len);
+        }
+    in.close();
+    out.close();
+    mp3.delete();
+}
+
+SECUENCIA
+
+readDir
+getMp3Artist
+getMp3Album
+createMp3Folder
+moveMp3

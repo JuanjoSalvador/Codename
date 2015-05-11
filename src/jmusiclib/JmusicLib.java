@@ -23,18 +23,7 @@ public class JmusicLib {
       File mFolder = new File(Library.music_path());
       System.out.println("Directorio por defecto: " + mFolder);
       GUI gui = new GUI();
-      gui.main();
-      // TESTING
-
-//      // Búsqueda
-//      System.out.print("Introduce un parámetro de búsqueda: ");
-//        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//        String input = br.readLine();
-//      Database.searchTrack(input);
-//      MusicPlayer.initPlay();
-//      // Cierre
-//      System.out.println("Finalizado");
-//        Database.closeDB();   
+      gui.main();  
     }
     
 }

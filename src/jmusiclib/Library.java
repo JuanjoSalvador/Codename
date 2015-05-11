@@ -174,7 +174,6 @@ public class Library {
     
     public static void ReadMp3(File dir) throws IOException {
         String name = dir.getName();
-        //System.out.println(name);
         try {
             MP3 mp3 = new MP3(dir);
                 // Strings

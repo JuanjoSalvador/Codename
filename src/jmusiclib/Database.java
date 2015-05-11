@@ -208,7 +208,7 @@ public class Database {
         return ruta;
     }
     
-    public static String[][] showAll() { 
+    public static Object[][] showAll() throws SQLException { 
         String[][] element = null;
         try {
             Statement st = con.createStatement(); 
@@ -217,12 +217,14 @@ public class Database {
                                  "where cancion.tituloDisco = disco.tituloDisco";
             
             ResultSet rs = st.executeQuery(searchTrack);
-            for (int i = 0; rs.next(); i++) {
-                for (int j = 0; rs.next(); j++) {
-                    element[i][j] = rs.getString("cancion.track");
+            while(rs.next()) {
+                for (int i = 1; rs.next(); i++) {
+                    for (int j = 1; rs.next(); j++) {
+                        element[i][j] = rs.getString("cancion.track");
+                    }
                 }
+                st.close();
             }
-            st.close();
         }
         catch (Exception e) {
             //e.printStackTrace();

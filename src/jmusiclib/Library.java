@@ -75,6 +75,7 @@ public class Library {
             //ex.printStackTrace();
         }
     }
+    //readDir & organizeDir are main methods here. They call all the others methods.
     
     public static void readDir(File dir) throws IOException {      
         File[] dirArray = dir.listFiles();
@@ -171,11 +172,6 @@ public class Library {
         return mp3Album;
     }
     
-    /**
-     * ReadLibrary(). Lee recursivamente el fichero de música obtenido mediante music_path() y muestra 
-     * los metadatos contenidos en los MP3 de dichos directorios y subdirectorios.
-     * @throws IOException 
-     */
     public static void ReadMp3(File dir) throws IOException {
         String name = dir.getName();
         //System.out.println(name);
@@ -204,58 +200,8 @@ public class Library {
         }
     }
     
-    /* OLD STUFF
-        Delete? Uhm.
-    */
-    public static void OrganizeLibrary() throws IOException {
-//        System.out.println("ORGANIZAR");
-//             
-//        File dir = new File(music_path()); // Abre el directorio "audios"
-//        File[] dirArray = dir.listFiles(); // Lista el directorio "audios" en un array
-//        Arrays.sort(dirArray); // Ordena el array
-//        for (int i = 0; i < dirArray.length; i++) {
-//            // Recorre el array de ficheros
-//            String name = dirArray[i].getName();
-//            File noData = dirArray[i];
-//            try {
-//                
-//                // MP3
-//                if (!dirArray[i].isDirectory() && extension(name).equals("mp3")) { // Comprueba si el elemento ES UN MP3
-//                    MP3 music = new MP3(dirArray[i]); // Crea un objeto MP3
-//                    String dirAutor = music.getLeadPerformer(); // Nombre del autor
-//                    String dirAlbum = music.getAlbum(); // Nombre del album
-//                                            
-//                    File folder = new File(dirAutor); // Crea un objeto File con el valor de "autores"
-//                    if (!folder.exists()) { // Si el directorio "autores" NO existe, lo crea.
-//                        File directorio = new File(music_path() + "/" + dirAutor + "/" + dirAlbum);
-//                        directorio.mkdirs();
-//                    }
-//                    
-//                    // Mueve los archivos MP3 en la carpeta de su autor
-//                    InputStream in = new FileInputStream(dirArray[i]);
-//                    OutputStream out = new FileOutputStream(music_path() + "/" + dirAutor + "/" + dirAlbum + "/" + name);
-//
-//                    byte[] buf = new byte[8192];
-//                    int len;
-//                        while ((len = in.read(buf)) > 0) {
-//                            out.write(buf, 0, len);
-//                        }
-//                    in.close();
-//                    out.close();
-//                    dirArray[i].delete();
-//                } else { 
-//                    // Si no es un MP3 ni un directorio lo manda a audios/Sin categoria
-//                        if (extension(name).equals("lac") || extension(name).equals("ogg") && !dirArray[i].isDirectory()) {
-//                            System.out.println("El fichero [" + dirArray[i] + "] no es un MP3");
-//                            noData(dirArray[i]);
-//                        }
-//                }        
-//            } catch (Exception ex) {
-//                //System.out.println("No se pueden leer los metadatos de [" + dirArray[i] + "], omitiendo fichero.");
-//                noData(dirArray[i]);
-//            }
-//        } 
-//        System.out.println("Operación finalizada.");
+    public static void updateLib() {
+        
     }
 }
 

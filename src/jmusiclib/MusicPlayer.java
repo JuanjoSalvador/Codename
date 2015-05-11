@@ -16,115 +16,11 @@ import javazoom.jlgui.basicplayer.*;
  * @author Juanjo Salvador
  */
 public class MusicPlayer implements BasicPlayerListener {
-//        private Player player;
-//        
-//        public long pauseLocation;
-//        public long songTotalLength;
-//        
-//        public String fileLocation;
-//        public String status = null;
-//        
-//        public Thread playerThread;
-//        
-//        private FileInputStream fis;
-//        private BufferedInputStream bis;
-//    
-//    public String getDuration(String filename) {
-//        String duration = null;
-//            try {
-//                MP3 mp3 = new MP3(filename);
-//                int audio = mp3.getAudioDuration();
-//                int minutes = audio / 60;
-//                int seconds = audio % 60;
-//                
-//                duration = minutes + ":" + seconds;
-//            } catch (IOException ex) {
-//                
-//            }
-//        return duration;
-//    }
-//        
-//    public void stop() {
-//        if (player != null) {
-//            player.close();
-//        }
-//    }
-//    
-//    public void pause() {
-//            try {
-//                status = "paused";
-//                player.close();
-//                pauseLocation = fis.available();
-//            } catch (IOException ex) {
-//                
-//            }
-//    }
-//        
-//    public void resume() throws JavaLayerException {
-//        try {
-//            fis = new FileInputStream(fileLocation);
-//            bis = new BufferedInputStream(fis);
-//            player = new Player(bis);
-//            
-//            fis.skip(songTotalLength - pauseLocation);
-//            
-//        } catch (FileNotFoundException | JavaLayerException e) {
-//            System.out.println("Problem resuming file " + fileLocation);
-//            System.out.println(e);
-//        } catch (IOException ex) {
-//                
-//        }
-//
-//        new Thread() {
-//            @Override
-//            public void run() {
-//                try { 
-//                    player.play(); 
-//                } catch (Exception e) { 
-//                    System.out.println(e); 
-//                }
-//            }
-//        }.start();
-//    }
-//    
-//    public void play(String filename) {
-//        if (status.equals("paused")) {
-//            resume();
-//        } else {
-//            try {
-//                fis = new FileInputStream(filename);
-//                bis = new BufferedInputStream(fis);
-//                player = new Player(bis);
-//                System.out.println("Playing file " + filename);
-//                songTotalLength = fis.available();
-//
-//                fileLocation = filename;
-//
-//            } catch (FileNotFoundException | JavaLayerException e) {
-//
-//                System.out.println("Problem playing file " + filename);
-//                System.out.println(e);
-//
-//            } catch (IOException ex) {
-//
-//            }
-//
-//            playerThread = new Thread() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        player.play();
-//                    } catch (Exception e) {
-//                        System.out.println(e); 
-//                    }
-//                }
-//            };
-//            playerThread.start();
-//        }
-//    }
-    
-    /* NEW STUFF (testing( */
-    
+
+    /* NEW STUFF (testing, need to be updated)
+       WORKS: Play button
+              Stop button
+    */ 
  
  
   private BasicPlayer player;
@@ -138,8 +34,8 @@ public class MusicPlayer implements BasicPlayerListener {
 //    player.addBasicPlayerListener(this);
   }
   
-  public void loadFile(String filename) throws BasicPlayerException {
-    control.open(new File(filename));
+  public void loadFile(File audio) throws BasicPlayerException {      
+      control.open(audio);
   }
   
   public void play() throws Exception {
@@ -154,8 +50,9 @@ public class MusicPlayer implements BasicPlayerListener {
   public void pausa() throws Exception {
       try {
         control.pause();
+        System.out.println("Pausado");
       } catch (BasicPlayerException bpe) {
-          System.out.println("Error al pausar");
+          
           bpe.printStackTrace();
       }
   }
@@ -182,6 +79,13 @@ public class MusicPlayer implements BasicPlayerListener {
       control.setGain(volume);
       System.out.println("Ajustando volumen a " + volume);
   }
+  
+  public void SavePlaylist(String[] songs, String PlName) throws IOException {
+      // Get all elements on JList and put it in the Array "songs"
+      Playlist pl = new Playlist(songs);
+      ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(PlName + ".pzs"));
+      oos.writeObject(pl);
+  } 
 
     @Override
     public void opened(Object o, Map map) {

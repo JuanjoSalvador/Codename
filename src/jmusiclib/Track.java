@@ -1,11 +1,8 @@
 package jmusiclib;
 
-import java.io.*;
-import com.beaglebuddy.mp3.*;
 /**
  *
  * @author Juanjo Salvador
- * @param author
  */
 public class Track {
     String author;

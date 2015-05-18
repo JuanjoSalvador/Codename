@@ -19,11 +19,11 @@ public class JmusicLib {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws IOException, SQLException {
-        
-      File mFolder = new File(Library.music_path());
+      Library lib = new Library();  
+      File mFolder = new File(lib.music_path());
       System.out.println("Directorio por defecto: " + mFolder);
       GUI gui = new GUI();
-      gui.main();  
+      gui.main();
     }
     
 }

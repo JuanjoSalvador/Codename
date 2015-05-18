@@ -8,22 +8,25 @@ package jmusiclib;
 
 import java.io.File;
 import java.sql.*;
-import java.util.Arrays;
 
 /**
  *
  * @author Juanjo Salvador
  */
-public class Database {
+public class MusicDB {
     
-    static String nombreBD = "jmusiclibDB";
-    static String usuario = "root";
-    static String password = "ironforge";
-    static String url = "jdbc:mysql://localhost/" + nombreBD;
-    static Connection con;
+    String nombreBD = "jmusiclibDB";
+    String usuario = "root";
+    String password = "ironforge";
+    String url = "jdbc:mysql://localhost/" + nombreBD;
+    Connection con;
+    Statement st;
     
     // OPEN AND CLOSE DATABASE
-    public static void connectDB() {
+    /**
+     * Open a database connection.
+     */
+    public void connectDB() {
         
         try {
             Class.forName("com.mysql.jdbc.Driver").newInstance(); 
@@ -37,20 +40,26 @@ public class Database {
             System.out.println("Ocurrió un error.");
         }
     }
-    
-    public static void closeDB() {
+    /**
+     * Close the database connection (if opened).
+     */
+    public void closeDB() {
         try {
             con.close();
         }
         catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
     
     // INSERT DATA ON DATABASE
-    public static void artistInsertDB(String nombreGrupo) {
+    /**
+     * Insert artist name on database
+     * @param nombreGrupo 
+     */
+    public void artistInsertDB(String nombreGrupo) {
         try {           
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String insertGrupo = "INSERT INTO grupo(nombreGrupo) VALUES ('" + nombreGrupo + "')";
             //System.out.println("Voy a ejecutar esta instrucción SQL:\n" + sql);
             int resultado = st.executeUpdate(insertGrupo);
@@ -63,27 +72,36 @@ public class Database {
             //e.printStackTrace();
         }
     }
-    
-    public static void albumInsertDB(String tituloDisco, int fechaLanza, String nombreGrupo) {
+    /**
+     * Insert album data on database
+     * @param tituloDisco
+     * @param fechaLanza
+     * @param nombreGrupo 
+     */
+    public void albumInsertDB(String tituloDisco, int fechaLanza, String nombreGrupo) {
         try {           
-            
-            Statement st = con.createStatement(); 
+            st = con.createStatement();
             String insertAlbum = "INSERT INTO disco(tituloDisco, fechaLanza, nombreGrupo) VALUES ('" + tituloDisco + "', '" + fechaLanza + "', '" + nombreGrupo + "')";
             //System.out.println("Voy a ejecutar esta instrucción SQL:\n" + sql);
             int resultado = st.executeUpdate(insertAlbum);
             if (resultado == 1) {
                 //System.out.println("Registro insertado con éxito");
             }
-            st.close();
         }
         catch (Exception e) {
             //e.printStackTrace();
         }
     }
-    
-    public static void trackInsertDB(String tituloCancion, int track, String ruta, String tituloDisco) {
+    /**
+     * Insert track data on database
+     * @param tituloCancion
+     * @param track
+     * @param ruta
+     * @param tituloDisco 
+     */
+    public void trackInsertDB(String tituloCancion, int track, String ruta, String tituloDisco) {
         try {           
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String insertTrack = "INSERT INTO cancion(tituloCancion, track, ruta, tituloDisco) VALUES ('" + tituloCancion + "', '" + track + "', '" + ruta + "', '" + tituloDisco + "')";
             //System.out.println("Voy a ejecutar esta instrucción SQL:\n" + sql);
             int resultado = st.executeUpdate(insertTrack);
@@ -98,27 +116,45 @@ public class Database {
     }
     
     // CLEAN DATABASE
-    public static void cleanDB() {
+    /**
+     * Delete entries on database what do not exists on filesystem
+     * @param toDelete 
+     */
+    public void delete(String toDelete) {
+        try {           
+            st = con.createStatement();
+            String del = ("DELETE FROM cancion WHERE ruta = '" + toDelete + "'");
+            st.executeQuery(del);
+            st.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Check all entry on database and check if it exists, delete if not.
+     */
+    public void cleanDB() {
         /* Lee el campo cancion.ruta de la base de datos
            Comprueba que la ruta existe
            Si no existe, borra el registro de la base de datos */
         try {           
-            Statement st = con.createStatement(); 
+            st = con.createStatement();
             String read = "SELECT ruta FROM cancion";
             ResultSet readRs = st.executeQuery(read);
                         
             while (readRs.next()) {
                 File file = new File(readRs.getString("ruta"));
-                if (!file.exists()) {
-                    String toDelete = readRs.getString("ruta");
+                String toDelete = readRs.getString("ruta");
+                if (!file.exists()) { 
                     System.out.println(toDelete);
-                    //st.executeQuery("DELETE FROM cancion WHERE ruta = '" + toDelete + "'");
-                }    
+                    delete(toDelete);
+                } 
             }
             st.close();
         }
         catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         
         // Lee el campo grupo.nombreGrupo de la base de datos
@@ -131,7 +167,12 @@ public class Database {
     }
     
     // SEARCH ON DATABASE
-    public static String searchParam(String input) {
+    /**
+     * Convert a word into a search parameter for SQL
+     * @param input
+     * @return all entries with the parameter in it
+     */
+    public String searchParam(String input) {
         String output = null;
         
         char[] param = input.toCharArray();
@@ -142,12 +183,15 @@ public class Database {
         }
         return output = "%" + String.valueOf(param) + "%";
     }
-    
-    public static void searchAlbum(String sInput) {
+    /**
+     * Gets a parameter provided by searchParam() and uses it for search an album into database 
+     * @param sInput 
+     */
+    public void searchAlbum(String sInput) {
         String titulo = searchParam(sInput);
         
         try {           
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String searchAlbum = "select cancion.track, cancion.tituloCancion, disco.tituloDisco, grupo.nombreGrupo " +
                                  "from grupo, disco, cancion " +
                                  "where grupo.nombreGrupo = disco.nombreGrupo and disco.tituloDisco = cancion.tituloDisco"
@@ -168,12 +212,15 @@ public class Database {
             //e.printStackTrace();
         }
     }
-    
-    public static void searchTrack(String sInput) {
+    /**
+     * Gets a parameter provided by searchParam() and uses it for search an track into database 
+     * @param sInput 
+     */
+    public void searchTrack(String sInput) {
         String titulo = searchParam(sInput);
         
         try {           
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String searchTrack = "SELECT cancion.idCancion, cancion.tituloCancion, cancion.tituloDisco,"
                                + " cancion.ruta FROM cancion WHERE tituloCancion like '" + titulo + "'";
             ResultSet rs = st.executeQuery(searchTrack);
@@ -190,11 +237,15 @@ public class Database {
             //e.printStackTrace();
         }
     }
-    
-    public static String selectTrack(String id) {   
+    /**
+     * Select a track by ID in database
+     * @param id
+     * @return track path
+     */
+    public String selectTrack(String id) {   
         String ruta = null;
         try {
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String searchTrack = "SELECT ruta FROM cancion WHERE idCancion = '" + id + "'";
             ResultSet rs = st.executeQuery(searchTrack);
             while (rs.next()) {
@@ -207,27 +258,32 @@ public class Database {
         }
         return ruta;
     }
-    
-    public static Object[][] showAll() throws SQLException { 
-        String[][] element = null;
+    /**
+     * Show all entries in database
+     * @return all entries in database
+     * @throws SQLException 
+     */
+    public Object[][] showAll() throws SQLException { 
+        String[][] element = new String[15][4];
         try {
-            Statement st = con.createStatement(); 
+            st = con.createStatement(); 
             String searchTrack = "select cancion.track, cancion.tituloCancion, disco.nombreGrupo, cancion.tituloDisco\n" +
                                  "from cancion, disco\n" +
                                  "where cancion.tituloDisco = disco.tituloDisco";
             
             ResultSet rs = st.executeQuery(searchTrack);
             while(rs.next()) {
-                for (int i = 1; rs.next(); i++) {
-                    for (int j = 1; rs.next(); j++) {
-                        element[i][j] = rs.getString("cancion.track");
-                    }
+                for (int i = 0; rs.next(); i++) {
+                        element[i][0] = rs.getString("cancion.track");
+                        element[i][1] = rs.getString("cancion.tituloCancion");
+                        element[i][2] = rs.getString("disco.nombreGrupo");
+                        element[i][3] = rs.getString("cancion.tituloDisco");
                 }
-                st.close();
             }
+            st.close();
         }
         catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         return element;
     }

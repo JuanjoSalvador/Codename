@@ -10,8 +10,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.UIManager.*;
 import javax.swing.border.*;
@@ -26,21 +24,25 @@ import javazoom.jlgui.basicplayer.BasicPlayerException;
 public class GUI implements ActionListener, ChangeListener {
     private JFrame main_window, update_window;
     private JProgressBar updateProgress;
-    private JButton play, pause, stop, next, last;
+    private JButton play, pause, stop, next, last, openPlaylist, savePlaylist;
     private JLabel volumeLevel, musicPosition;
     private JTextField search_input;
-    private JSlider volume;
+    private JSlider volume, posBar;
     private JPanel library, mPlayer, mPlaylist;
     private JMenuBar menu;
-    private JMenu menu_player;
-    private JMenuItem updateList, openAudio;
+    private JMenu menu_player, about;
+    private JMenuItem updateList, openAudio, aboutProject, license;
+    private ImageIcon icon;
     
     private final Border blackline = BorderFactory.createLineBorder(Color.gray);
     
     MusicPlayer player = new MusicPlayer();
+    MusicDB db = new MusicDB();
+    Library lib = new Library();
+    Object[][] data;
     
     public void main() throws SQLException {
-        main_window = new JFrame("JmusicLib Alpha Dev 0.3 - Testing GUI");
+        main_window = new JFrame("Codename Alpha Dev 0.5");
         Color bg = new Color(238, 238, 238);
         
         try {
@@ -58,16 +60,28 @@ public class GUI implements ActionListener, ChangeListener {
         
         menu = new JMenuBar();
         menu_player = new JMenu("Player");
+        about = new JMenu("About");
+        // Player
         updateList = new JMenuItem("Update library");
         updateList.addActionListener(this);
         updateList.setName("update");
         openAudio = new JMenuItem("Open audio file...");
         openAudio.addActionListener(this);
         openAudio.setName("openAudio");
+        // About
+        aboutProject = new JMenuItem("About the project");
+        aboutProject.addActionListener(this);
+        aboutProject.setName("aboutProject");
+        license = new JMenuItem("License");
+        license.addActionListener(this);
+        license.setName("license");
         
         menu.add(menu_player);
+        menu.add(about);
         menu_player.add(openAudio);
         menu_player.add(updateList);
+        about.add(aboutProject);
+        about.add(license);
         
         /* AUDIO CONTROLS*/
         
@@ -121,9 +135,9 @@ public class GUI implements ActionListener, ChangeListener {
         posBarDim.width = 800;
         posBarDim.height = 17;
         int POS_MIN = 0;
-        int POS_MAX = 100;
+        float POS_MAX = player.bytesLength;
         int POS_INIT = 0;
-        JSlider posBar = new JSlider(JSlider.HORIZONTAL, POS_MIN, POS_MAX, POS_INIT);
+        posBar = new JSlider(JSlider.HORIZONTAL, POS_MIN, (int) POS_MAX, POS_INIT);
         posBar.setPreferredSize(posBarDim);
         
         mPlayer.add(posBar);
@@ -147,8 +161,9 @@ public class GUI implements ActionListener, ChangeListener {
                 
             // Data
         String[] columnNames = {"#", "Titulo", "Artista", "Disco"};
-        Object[][] data = {{"1", "Titulo", "Artista", "Disco"}};
-//        data = Database.showAll();
+        db.connectDB();
+        data = db.showAll();
+        db.closeDB();
         
             // Table
         JTable mTable = new JTable(data, columnNames);
@@ -174,7 +189,6 @@ public class GUI implements ActionListener, ChangeListener {
         
         search_input = new JTextField(60);
         
-        //library.add(path_input);
         library.add(search_input);
         library.add(mTable);
         library.add(new JScrollPane(mTable));
@@ -202,10 +216,10 @@ public class GUI implements ActionListener, ChangeListener {
         
         mPlaylist.setPreferredSize(playlistPanel);
         
-        JButton savePlaylist = new JButton("Save");
+        savePlaylist = new JButton("Save");
         savePlaylist.addActionListener(this);
         //savePlaylist.setName("save");
-        JButton openPlaylist = new JButton("Open");
+        openPlaylist = new JButton("Open");
         openPlaylist.addActionListener(this);
         //openPlaylist.setName("open");
         
@@ -225,6 +239,8 @@ public class GUI implements ActionListener, ChangeListener {
         //path = new JLabel("Ruta: ");
         
         //main_window.add(path);
+        icon = new ImageIcon("img/Logo.png");
+        main_window.setIconImage(icon.getImage());
         main_window.setJMenuBar(menu);
         main_window.add(mPlaylist);
         main_window.add(library);
@@ -266,19 +282,22 @@ public class GUI implements ActionListener, ChangeListener {
                 //Utilizamos un while para emular el valor mínimo y máximo
                 //En este caso 0 - 100
                     //Asignamos valor a nuestro JProgressBar por cada siclo del bucle
-                    File mFolder = new File(Library.music_path());
+                    File mFolder = new File(lib.music_path());
                     System.out.println("Conectando con la base de datos...");
-                    Database.connectDB();
-                    updateProgress.setValue(25);
+                    db.connectDB();
+                    updateProgress.setValue(20);
                     try {
-                        Library.readDir(mFolder);
-                        updateProgress.setValue(50);
-                        Library.organizeDir(mFolder);
-                        updateProgress.setValue(75);
+                        lib.readDir(mFolder);
+                        updateProgress.setValue(45);
+                        lib.organizeDir(mFolder);
+                        updateProgress.setValue(65);
+                        lib.ReadMp3(mFolder);
+                        updateProgress.setValue(80);
                     } catch (IOException ex) {
                         System.out.println("Error de lectura");
                     }    
-                    Database.cleanDB();
+                    db.cleanDB();
+                    db.closeDB();
                     updateProgress.setValue(100);
                     update_window.setVisible(false);
             }
@@ -288,18 +307,26 @@ public class GUI implements ActionListener, ChangeListener {
         }
         
         if (e.getSource() == play) {
-            File mp3 = new File(search_input.getText());
-            try {
-                player.loadFile(mp3);
-                player.play();    
-            } catch (Exception ex) {
-                System.out.println(ex);
+            if (!MusicPlayer.status.equals("PAUSED")) {
+                File mp3 = new File(search_input.getText());
+                try {
+                    player.loadFile(mp3);
+                    player.play();    
+                } catch (Exception ex) {
+                    System.out.println(ex);
+                }
+            } else {
+                try {
+                    player.resume();
+                } catch (Exception ex) {
+                    
+                }
             }
         }
         
         if (e.getSource() == pause) {
             try {
-                player.pausa();
+                player.pause();
             } catch (Exception ex) {
                
             }
@@ -307,7 +334,7 @@ public class GUI implements ActionListener, ChangeListener {
         
         if (e.getSource() == stop) {
             try {
-                player.pausa();
+                player.pause();
                 player.stop();
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -315,34 +342,56 @@ public class GUI implements ActionListener, ChangeListener {
         }
         
         if (e.getSource() == next) {
-            JOptionPane.showMessageDialog(null, "Not supported on Alpha Dev.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Not supported on this version yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
         
         if (e.getSource() == last) {
-            JOptionPane.showMessageDialog(null, "Not supported on Alpha Dev.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Not supported on this version yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
         }
         
-//        if (e.getSource() == save) {
-//           JOptionPane.showMessageDialog(null, "Not supported on Alpha Dev.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//        }
+        if (e.getSource() == savePlaylist) {
+           JOptionPane.showMessageDialog(null, "Not supported on this version yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        }
         
-//        if (e.getSource() == openPlaylist) {
-//            JOptionPane.showMessageDialog(null, "Not supported on Alpha Dev.", "Info", JOptionPane.INFORMATION_MESSAGE);
-//        }
+        if (e.getSource() == openPlaylist) {
+           JOptionPane.showMessageDialog(null, "Not supported on this version yet.", "Info", JOptionPane.INFORMATION_MESSAGE);
+        }
         
-          if (e.getSource() == openAudio) {
-              JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-                int result = fileChooser.showOpenDialog(openAudio);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    System.out.println("Selected file: " + String.valueOf(selectedFile));
-                  try {
-                      player.loadFile(selectedFile);
-                      player.play();                     
-                  } catch (Exception ex) { }
-                }
-          }
+        if (e.getSource() == openAudio) {
+            JFileChooser fileChooser = new JFileChooser();
+              
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            int result = fileChooser.showOpenDialog(openAudio);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+              try {
+                  player.loadFile(selectedFile);
+                  player.play();                     
+              } catch (Exception ex) { }
+            }
+        }
+        
+        if (e.getSource() == aboutProject) {
+            JOptionPane.showMessageDialog(null, "<html><b>Codename</b> (JmusicLib) is developed by Juan José Salvador.</html> \n"
+                                              + "Is available under GPLv3 on GitHub. For more information \n"
+                                              + "and support the project, please visit \n"
+                                              + "<html><a href='https://github.com/JuanjoSalvador'>https://github.com/JuanjoSalvador</a></html>" , "About the project", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
+        if (e.getSource() == license) {
+            JOptionPane.showMessageDialog(null, "This program is free software: you can redistribute it and/or modify\n" +
+                                                "it under the terms of the GNU General Public License as published by\n" +
+                                                "the Free Software Foundation, either version 3 of the License, or\n" +
+                                                "(at your option) any later version.\n" +
+                                                "\n" +
+                                                "This program is distributed in the hope that it will be useful,\n" +
+                                                "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" +
+                                                "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" +
+                                                "GNU General Public License for more details.\n" +
+                                                "\n" +
+                                                "You should have received a copy of the GNU General Public License\n" +
+                                                "along with this program.  If not, see <http://www.gnu.org/licenses/>", "License", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
    
     @Override

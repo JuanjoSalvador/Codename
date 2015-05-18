@@ -1,7 +1,5 @@
 package jmusiclib;
 
-import com.beaglebuddy.id3.enums.PictureType;
-import com.beaglebuddy.id3.pojo.AttachedPicture;
 import com.beaglebuddy.mp3.MP3;
 import java.io.*;
 import java.util.Arrays;
@@ -14,16 +12,15 @@ public class Library {
     /* NEW STUFF 
         Needs doc (txt available now)
     */
-    
+    MusicDB db = new MusicDB();
     /**
      * Devuelve la ruta por defecto para la música basándose en el SO (C:\%Username%\Música para Windows y /home/user/Música para Linux)
      * @return 
      */
-    public static String music_path() {
+    public String music_path() {
     // Comprueba el SO para establecer la ruta de música por defecto
         String path;
         String SisOp = System.getProperty("os.name");
-        int last_char = SisOp.length();
         String so = ""  + SisOp.charAt(0) + SisOp.charAt(1) + SisOp.charAt(2);
         String user = System.getProperty("user.name");
         if (so.equals("Win")) {
@@ -41,7 +38,7 @@ public class Library {
      * @param file
      * @return extensión del fichero
      */
-    public static String extension(String file) {
+    public String extension(String file) {
         int last_char = file.length();
         String exten = ""  + file.charAt(last_char - 3) + file.charAt(last_char - 2) + file.charAt(last_char - 1);
         return exten;
@@ -52,7 +49,7 @@ public class Library {
      * a una carpeta aparte (Sin categoría).
      * @param noData 
      */
-    public static void noData (File noData) {
+    public void noData (File noData) {
         String name = noData.getName();
         File milascea = new File(music_path() + "/Sin categoría/");
         File noCat = new File(music_path() + "/Sin categoría/" + name);
@@ -77,7 +74,7 @@ public class Library {
     }
     //readDir & organizeDir are main methods here. They call all the others methods.
     
-    public static void readDir(File dir) throws IOException {      
+    public void readDir(File dir) throws IOException {      
         File[] dirArray = dir.listFiles();
         Arrays.sort(dirArray); // Array de File ordenado con el contenido del directorio de música
         for (int i = 0; i < dirArray.length; i++) {
@@ -93,7 +90,7 @@ public class Library {
         }
     }
     
-    public static void organizeDir(File dir) throws IOException {
+    public void organizeDir(File dir) throws IOException {
         File[] dirArray = dir.listFiles();
         Arrays.sort(dirArray); // Array de File ordenado con el contenido del directorio de música
         for (int i = 0; i < dirArray.length; i++) {
@@ -117,7 +114,7 @@ public class Library {
         }
     }
     
-    public static void createMp3Folder(File mp3) throws IOException {
+    public void createMp3Folder(File mp3) throws IOException {
         String fPath   = music_path();
         String fArtist = getMp3Artist(mp3);
         String fAlbum  = getMp3Album(mp3);
@@ -129,7 +126,7 @@ public class Library {
         }
     }
     
-    public static void moveMp3(File mp3) throws FileNotFoundException, IOException {
+    public void moveMp3(File mp3) throws FileNotFoundException, IOException {
         String name = mp3.getName();
         String fArtist = getMp3Artist(mp3);
         String fAlbum  = getMp3Album(mp3);
@@ -150,7 +147,7 @@ public class Library {
         }
     }
     
-    public static String getMp3Artist(File mp3) {
+    public String getMp3Artist(File mp3) {
         String mp3Author;
         try {
             MP3 mp3File = new MP3(mp3);
@@ -161,7 +158,7 @@ public class Library {
         return mp3Author;
     }
     
-    public static String getMp3Album(File mp3) {
+    public String getMp3Album(File mp3) {
         String mp3Album;
         try {
             MP3 mp3File = new MP3(mp3);
@@ -172,8 +169,9 @@ public class Library {
         return mp3Album;
     }
     
-    public static void ReadMp3(File dir) throws IOException {
+    public void ReadMp3(File dir) throws IOException {
         String name = dir.getName();
+        //System.out.println(name);
         try {
             MP3 mp3 = new MP3(dir);
                 // Strings
@@ -189,18 +187,15 @@ public class Library {
                     fileArtist = "Sin categoría";
                     fileAlbum  = "Sin categoría";
                 } else {
-                    Database.artistInsertDB(fileArtist);
-                    Database.albumInsertDB(fileAlbum, fileYear, fileArtist);
-                    Database.trackInsertDB(fileTitle, fileTrack, filePath, fileAlbum);
+                    db.artistInsertDB(fileArtist);
+                    db.albumInsertDB(fileAlbum, fileYear, fileArtist);
+                    db.trackInsertDB(fileTitle, fileTrack, filePath, fileAlbum);
+                    //System.out.println("[" + dir + "] añadido correctamente");
                 }   
             
         } catch (IOException ioex) {
-            //System.out.println("No se pueden leer los metadatos de [" + dir + "].");
+            System.out.println("No se pueden leer los metadatos de [" + dir + "].");
         }
-    }
-    
-    public static void updateLib() {
-        
     }
 }
 

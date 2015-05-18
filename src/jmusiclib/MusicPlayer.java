@@ -25,8 +25,9 @@ public class MusicPlayer implements BasicPlayerListener {
  
   private BasicPlayer player;
   private BasicController control;
-  private float bytesLength;
-  private String status;
+  public float bytesLength;
+  public static String status;
+  private double volume;
   
   public MusicPlayer() {
     player = new BasicPlayer();
@@ -39,25 +40,26 @@ public class MusicPlayer implements BasicPlayerListener {
   }
   
   public void play() throws Exception {
-      try {
-        control.play();
-      } catch (BasicPlayerException bpe) {
-          System.out.println("Error al reproducir");
-          bpe.printStackTrace();
-      }
+        try {
+            control.play();
+            SoundVolume(volume);
+            status = "PLAYING";
+        } catch (BasicPlayerException bpe) {
+            //System.out.println("Error al reproducir");
+            System.out.println(bpe);
+        }
   }
 
-  public void pausa() throws Exception {
+  public void pause() throws Exception {
       try {
         control.pause();
-        System.out.println("Pausado");
+        status = "PAUSED";
       } catch (BasicPlayerException bpe) {
-          
           bpe.printStackTrace();
       }
   }
 
-  public void continuar() throws Exception {
+  public void resume() throws Exception {
       try {
         control.resume();
       } catch (BasicPlayerException bpe) {
@@ -69,6 +71,7 @@ public class MusicPlayer implements BasicPlayerListener {
   public void stop() throws Exception {
       try {
         control.stop();
+        status = "STOPPED";
       } catch (BasicPlayerException bpe) {
           System.out.println("Error al reproducir");
           bpe.printStackTrace();
@@ -77,7 +80,6 @@ public class MusicPlayer implements BasicPlayerListener {
   
   public void SoundVolume(double volume) throws BasicPlayerException {
       control.setGain(volume);
-      System.out.println("Ajustando volumen a " + volume);
   }
   
   public void SavePlaylist(String[] songs, String PlName) throws IOException {
@@ -96,6 +98,7 @@ public class MusicPlayer implements BasicPlayerListener {
     public void progress(int bytesread, long microseconds, byte[] pcmdata, Map properties) {
         float progressUpdate = (float) (bytesread * 1.0f / bytesLength * 1.0f);
         int progressNow = (int) (bytesLength * progressUpdate);
+        System.out.println("progress : "+properties.toString());
     }
 
     @Override

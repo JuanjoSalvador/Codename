@@ -10,4 +10,5 @@ La documentación del proyecto ha sido eliminada temporalmente hasta la publicac
 
 Versión abierta para desarrollo a partir del 22 de Mayo de 2015.
 
-Puedes seguir el desarrollo más de cerca a través de Twitter, en el hashtag [#JmusicLib](https://twitter.com/hashtag/jmusiclib?f=realtime)
+Puedes seguir el desarrollo más de cerca a través de Twitter, en el hashtag 
+[#JmusicLib](https://twitter.com/hashtag/jmusiclib?f=realtime)
